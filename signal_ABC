@@ -1,0 +1,57 @@
+#include <stdio.h>
+
+#include <sys/types.h>
+#include <unistd.h>
+#include <wait.h>
+
+#include <signal.h>
+
+void print_B(int sign_no)
+{
+    printf("B\n");
+}
+void print_C(int sign_no)
+{
+    printf("C\n");
+}
+
+int main()
+{
+    pid_t pid1;
+    pid_t pid2;
+
+    pid1 = fork();
+
+    if(pid1 == 0)
+    {
+        pid2 = fork();
+        
+	if(pid2 == 0)
+	{
+	    signal(SIGALRM,print_C);
+	    sleep(2);
+
+	    while(1)
+	    {
+	        sleep(2);
+	    }
+	}
+	else if(pid2 > 0)
+	{
+	    signal(SIGINT,print_B);
+	    sleep(2);
+
+	    while(1)
+	    {
+	        kill(pid2,SIGALRM);
+		sleep(2);
+	    }
+	}
+    }
+    else if(pid1 > 0)
+    {
+        printf("A\n");
+	kill(pid1,SIGINT);
+	sleep(2);
+    }
+}
